@@ -10,6 +10,7 @@ struct Header {
 
 struct ClassFile {
     char[] bytecode;
+    ConstantPool conpool;
     usz len;
     usz pos;
     Header hdr; 
@@ -29,7 +30,7 @@ fn void ClassFile.init_cf(&self, char[] bc) {
 
 fn void? ClassFile.parse_header(&self) {
     self.hdr.magic = self.parse_u4();
-    if (self.hdr.magic != 0xCAFEBABE) return ClassFileError.INVALID_MAGIC; 
+    if (self.hdr.magic != 0xCAFEBABE) return INVALID_MAGIC; 
     self.hdr.minor = self.parse_u2();
     self.hdr.major = self.parse_u2();
     self.hdr.conpool_count = self.parse_u2();

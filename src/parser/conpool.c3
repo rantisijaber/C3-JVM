@@ -19,7 +19,7 @@ fn ConstantType? get_type(char tag)  {
         case 18: return ConstantType.TYPE_INVOKEDYNAMIC;
         case 19: return ConstantType.TYPE_MODUL;
         case 20: return ConstantType.TYPE_PACKAGE;
-        default: return ClassFileError.TYPE_NONEXIST;
+        default: return TYPE_NONEXIST;
     }
 
 }
@@ -44,10 +44,8 @@ enum ConstantType  {
     TYPE_PACKAGE,
 }
 
-fault ClassFileError {
-    TYPE_NONEXIST,
-    INVALID_MAGIC,
-}
+faultdef TYPE_NONEXIST, INVALID_MAGIC;
+
 
 
 struct MethodHandle {
@@ -79,12 +77,11 @@ struct ConPoolEntry {
         ulong entry_double;
     
         char[] entry_utf8;
-    };
+    }
 }
 
 struct ConstantPool {
-    ConPoolEntry[] map;
-    
+    ConPoolEntry[] map;    
 }
 
 
