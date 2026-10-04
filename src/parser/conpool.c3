@@ -1,4 +1,6 @@
 module jvm::parser;
+import std::io;
+import libc;
 
 fn ConstantType? get_type(char tag)  {
     switch (tag) {
@@ -19,7 +21,7 @@ fn ConstantType? get_type(char tag)  {
         case 18: return ConstantType.TYPE_INVOKEDYNAMIC;
         case 19: return ConstantType.TYPE_MODUL;
         case 20: return ConstantType.TYPE_PACKAGE;
-        default: return TYPE_NONEXIST;
+        default: return TYPE_NONEXIST~;
     }
 
 }
@@ -54,34 +56,78 @@ struct MethodHandle {
 }
 
 struct ConPoolEntry {
-    char tag;
-    union type {
-        ushort entry_class;
-        ushort entry_string;
-        ushort entry_module;
-        ushort entry_package;
-        ushort entry_method_type;
-
+    ConstantType tag;
+    union etype {
+        ushort entry_16bit;
         MethodHandle entry_method_handle;
-        
-        uint entry_integer;
-        uint entry_float;
-        uint entry_fieldref;
-        uint entry_methodref;
-        uint entry_interface_methodref;
-        uint entry_name_and_type;
-        uint entry_dynamic;
-        uint entry_invoke_dynamic;
-
-        ulong entry_long;
-        ulong entry_double;
-    
+        uint entry_32bit;
+        ulong entry_64bit;
         char[] entry_utf8;
     }
 }
+
 
 struct ConstantPool {
     ConPoolEntry[] map;    
 }
 
+fn void ConstantPool.init(&self,  ushort conpool_count) {
+    *self = {
+        .map = mem::new_array(ConPoolEntry, conpool_count)
+    };
+}
 
+fn void ConstantPool.append(&self, ConPoolEntry entry, uint index) {
+   self.map[index] = entry; 
+}
+
+
+fn void? ClassFile.parse_conpool(&self, ConstantPool* pool) {
+    for (uint i = 1; i < self.hdr.conpool_count; i++) {
+        char tag = self.bytecode[self.pos];
+        self.pos++;       
+        ConstantType entag = get_type(tag)!;
+       
+        ConPoolEntry entry = { .tag = entag };
+
+        switch (entag) {
+            case ConstantType.TYPE_UTF8: 
+                ushort length = self.parse_u2();
+                char[] parsed = self.bytecode[self.pos:length];
+                self.pos += length;
+                entry.etype.entry_utf8 = parsed; 
+            case ConstantType.TYPE_FIELDREF:
+            case ConstantType.TYPE_METHODREF:
+            case ConstantType.TYPE_INTERFACE_METHODREF:
+            case ConstantType.TYPE_NAMEANDTYPE:
+            case ConstantType.TYPE_DYNAMIC:
+            case ConstantType.TYPE_INVOKEDYNAMIC:
+            case ConstantType.TYPE_INTEGER:
+            case ConstantType.TYPE_FLOAT:                
+                uint parsed = self.parse_u4();
+                entry.etype.entry_32bit = parsed;
+            case ConstantType.TYPE_LONG:
+            case ConstantType.TYPE_DOUBLE:
+                uint f32 = self.parse_u4();
+                uint s32 = self.parse_u4();
+                ulong parsed = ((ulong) f32 << 32)
+                                | ((ulong)s32);
+                entry.etype.entry_64bit = parsed;
+            case ConstantType.TYPE_CLASS:
+            case ConstantType.TYPE_STRING:
+            case ConstantType.TYPE_METHODTYPE:
+            case ConstantType.TYPE_MODUL:
+            case ConstantType.TYPE_PACKAGE:
+                ushort parsed = self.parse_u2();
+                entry.etype.entry_16bit = parsed;
+            case ConstantType.TYPE_METHODHANDLE:
+                MethodHandle handle = {
+                    .ref_kind = self.bytecode[self.pos++],
+                    .ref_index = self.parse_u2()
+                };
+
+                entry.etype.entry_method_handle = handle;            
+        }
+        pool.append(entry, i);
+    }
+}

@@ -9,6 +9,16 @@ fn int main(String[] args)
         return 1;
     }
 
+    char[]? load_file = file::load(mem, args[1]);
+
+    if (catch error = load_file) {
+        io::eprintf("Error: Could not load file - %s", error);
+        return 1;
+    }
+    
+    char[] bytecode = load_file;
+    
+    defer mem::free(bytecode);
     
 	return 0;
 }
