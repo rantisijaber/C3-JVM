@@ -72,8 +72,10 @@ struct ConstantPool {
 }
 
 fn void ConstantPool.init(&self,  ushort conpool_count) {
+    sz size = (sz) conpool_count + 1;
+
     *self = {
-        .map = mem::new_array(ConPoolEntry, conpool_count)
+        .map = mem::new_array(ConPoolEntry, size)
     };
 }
 
@@ -83,7 +85,7 @@ fn void ConstantPool.append(&self, ConPoolEntry entry, uint index) {
 
 
 fn void? ClassFile.parse_conpool(&self, ConstantPool* pool) {
-    for (uint i = 1; i < self.hdr.conpool_count; i++) {
+    for (uint i = 1; i <= self.hdr.conpool_count; i++) {
         char tag = self.bytecode[self.pos];
         self.pos++;       
         ConstantType entag = get_type(tag)!;
