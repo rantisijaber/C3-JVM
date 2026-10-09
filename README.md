@@ -8,7 +8,7 @@ A work-in-progress JVM written in [C3](https://c3-lang.org), built to learn how 
 
 - [x] Read a `.class` file into memory
 - [x] Parse the header (magic, minor/major version, constant pool count)
-- [ ] Parse the constant pool (in progress)
+- [x] Parse the constant pool 
 - [ ] Parse access flags, `this_class`, `super_class`, interfaces
 - [ ] Parse fields and methods
 - [ ] Parse attributes (`Code`, `SourceFile`, etc.)
