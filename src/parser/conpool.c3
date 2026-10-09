@@ -27,6 +27,7 @@ fn ConstantType? get_type(char tag)  {
 }
 
 enum ConstantType  {
+    TYPE_IND0,
     TYPE_UTF8,
     TYPE_INTEGER,
     TYPE_FLOAT,
@@ -71,11 +72,9 @@ struct ConstantPool {
     ConPoolEntry[] map;    
 }
 
-fn void ConstantPool.init(&self,  ushort conpool_count) {
-    sz size = (sz) conpool_count + 1;
-
+fn void ConstantPool.init_conpool(&self,  ushort conpool_count) {
     *self = {
-        .map = mem::new_array(ConPoolEntry, size)
+        .map = mem::new_array(ConPoolEntry, (sz) conpool_count)
     };
 }
 
@@ -84,8 +83,13 @@ fn void ConstantPool.append(&self, ConPoolEntry entry, uint index) {
 }
 
 
-fn void? ClassFile.parse_conpool(&self, ConstantPool* pool) {
-    for (uint i = 1; i <= self.hdr.conpool_count; i++) {
+fn void? ClassFile.parse_conpool(&self) {
+    self.conpool.map[0] = {
+        .tag = TYPE_IND0,
+        .etype = {}
+    };
+
+    for (uint i = 1; i < self.hdr.conpool_count; i++) {
         char tag = self.bytecode[self.pos];
         self.pos++;       
         ConstantType entag = get_type(tag)!;
@@ -128,8 +132,9 @@ fn void? ClassFile.parse_conpool(&self, ConstantPool* pool) {
                     .ref_index = self.parse_u2()
                 };
 
-                entry.etype.entry_method_handle = handle;            
+                entry.etype.entry_method_handle = handle;   
+            default: return TYPE_NONEXIST~;
         }
-        pool.append(entry, i);
+        self.conpool.append(entry, i);
     }
 }
