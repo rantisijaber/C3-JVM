@@ -47,8 +47,7 @@ enum ConstantType  {
     TYPE_PACKAGE,
 }
 
-faultdef TYPE_NONEXIST, INVALID_MAGIC;
-
+excuse { TYPE_NONEXIST, INVALID_MAGIC }
 
 
 struct MethodHandle {
