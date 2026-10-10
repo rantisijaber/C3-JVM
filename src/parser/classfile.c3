@@ -76,7 +76,7 @@ struct AccessFlagList {
 }
     
 fn void AccessFlagList.append(&self, AccessFlagKind kind) {
-    self.kinds[self.pos] = kind;
+    self.kinds[self.pos++] = kind;
 }
 
 enum AccessFlagKind {
