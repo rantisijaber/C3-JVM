@@ -68,17 +68,24 @@ struct ConPoolEntry {
 
 
 struct ConstantPool {
-    ConPoolEntry[] map;    
+    ConPoolEntry[] map;
+    usz pos;
 }
 
 fn void ConstantPool.init_conpool(&self,  ushort conpool_count) {
     *self = {
-        .map = mem::new_array(ConPoolEntry, (sz) conpool_count)
+        .map = mem::new_array(ConPoolEntry, (sz) conpool_count),
+        .pos = 1
     };
 }
 
-fn void ConstantPool.append(&self, ConPoolEntry entry, uint index) {
-   self.map[index] = entry; 
+
+fn ConPoolEntry ConstantPool.get(&self, usz ind) @operator([]) {
+    return self.map[ind];
+}
+
+fn void ConstantPool.append(&self, ConPoolEntry entry) {
+    self.map[self.pos++] = entry;
 }
 
 
@@ -134,6 +141,6 @@ fn void? ClassFile.parse_conpool(&self) {
                 entry.etype.entry_method_handle = handle;   
             default: return TYPE_NONEXIST~;
         }
-        self.conpool.append(entry, i);
+        self.conpool.append(entry);
     }
 }

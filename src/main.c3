@@ -30,6 +30,8 @@ fn int main(String[] args)
     if (catch error = cf.init_cf(bytecode)) {
         io::eprintfn("Error: Could not initialize class file - %s", error);
     }
+    
+
 
     Organized og = { .cf = &cf };
     og.read_header();

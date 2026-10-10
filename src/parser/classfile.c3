@@ -15,20 +15,7 @@ struct ClassFile {
     Header hdr; 
     ConstantPool conpool;
     char[] bytecode;
-    AccessFlag[] access_flag;
-}
-
-// access flag rules, have to use bit masking
-
-enum AccessFlag {
-    AF_PUBLIC,
-    AF_FINAL,
-    AF_SUPER,
-    AF_INTERFACE,
-    AF_ABSTRACT,
-    AF_SYNTEHTIC,
-    AF_ANNOTATION,
-    AF_ENUM
+    AccessFlagList acc_list;
 }
 
 fn void? ClassFile.init_cf(&self, char[] bc) {
@@ -73,6 +60,40 @@ fn uint ClassFile.parse_u4(&self) {
 }
 
 
+// access flag rules, have to use bit masking
+/* 
+1. if interface is set, abstract must also be set.  
+2. if interface not specified then it must be a class
+3. if interface is not set then it can have any of the other flags other than annotation flag
+4. class cannot be both abstract and final
+5. set all classes to super
+
+*/
+
+struct AccessFlagList {
+    AccessFlagKind[5] kinds;
+    usz pos;
+}
+    
+fn void AccessFlagList.append(&self, AccessFlagKind kind) {
+    self.kinds[self.pos] = kind;
+}
+
+enum AccessFlagKind {
+    AF_PUBLIC,
+    AF_FINAL,
+    AF_SUPER,
+    AF_INTERFACE,
+    AF_ABSTRACT,
+    AF_SYNTEHTIC,
+    AF_ANNOTATION,
+    AF_ENUM
+}
+
 fn void ClassFile.parse_acc(&self) {
+    ushort access_flags = self.parse_u2();
+    if (access_flags & 1){
+        self.acc_list.append(AF_PUBLIC);
+    } 
 
 } 
