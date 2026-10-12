@@ -1,10 +1,26 @@
 module jvm::parser;
 import std::io;
 
+
+macro String[16] @class_flag_names($Type) {
+    String[16] names;
+    $foreach $member : $Type::members:
+        names[$member.bitoffset] = $member.name;
+    $endforeach
+    return names;
+}
+
+
 struct Organized {
     ClassFile* cf;
 }
 
+fn void Organized.read_class_flags(&self, ushort val) {
+    String[16] names = @class_flag_names(ClassAccessFlags);
+    for (ushort i = 0; i < 16; i++) {
+        if (val & (1 << i)) io::printfn(names[i]);
+    }
+}
 
 fn void Organized.init_organized(&self, ClassFile* cf) {
     self.cf = cf;
@@ -24,4 +40,9 @@ fn void Organized.read_conpool(&self) {
         io::printfn("Index: %d <-> Tag: %s" , i, entry.tag);
     } 
 }
+
+
+
+
+
 

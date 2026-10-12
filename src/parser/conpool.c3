@@ -1,4 +1,6 @@
 module jvm::parser;
+
+import jvm::excuse;
 import std::io;
 import libc;
 
@@ -21,7 +23,7 @@ fn ConstantType? get_type(char tag)  {
         case 18: return ConstantType.TYPE_INVOKEDYNAMIC;
         case 19: return ConstantType.TYPE_MODUL;
         case 20: return ConstantType.TYPE_PACKAGE;
-        default: return TYPE_NONEXIST~;
+        default: return excuse::TYPE_NONEXIST~;
     }
 
 }
@@ -47,7 +49,6 @@ enum ConstantType  {
     TYPE_PACKAGE,
 }
 
-excuse { TYPE_NONEXIST, INVALID_MAGIC }
 
 
 struct MethodHandle {
@@ -139,7 +140,7 @@ fn void? ClassFile.parse_conpool(&self) {
                 };
 
                 entry.etype.entry_method_handle = handle;   
-            default: return TYPE_NONEXIST~;
+            default: return excuse::TYPE_NONEXIST~;
         }
         self.conpool.append(entry);
     }

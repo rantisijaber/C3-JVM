@@ -1,4 +1,6 @@
 module jvm::parser;
+
+import jvm::excuse;
 import std::io;
 import libc;
 
@@ -15,7 +17,7 @@ struct ClassFile {
     Header hdr; 
     ConstantPool conpool;
     char[] bytecode;
-    AccessFlagList acc_list;
+    ClassAccessFlags class_access_flags;
 }
 
 fn void? ClassFile.init_cf(&self, char[] bc) {
@@ -24,19 +26,21 @@ fn void? ClassFile.init_cf(&self, char[] bc) {
         .len = bc.len, 
         .pos = 0,
         .hdr = {},
-        .conpool = {}
+        .conpool = {},
+        .class_access_flags = {}
     };
 
     self.parse_header()!;
     self.conpool.init_conpool(self.hdr.conpool_count);
     self.parse_conpool()!;
+    self.parse_class_acc()!;
 }
 
 
 
 fn void? ClassFile.parse_header(&self)  {
     self.hdr.magic = self.parse_u4();
-    if (self.hdr.magic != 0xCAFEBABE) return INVALID_MAGIC~; 
+    if (self.hdr.magic != 0xCAFEBABE) return excuse::INVALID_MAGIC~; 
     self.hdr.minor = self.parse_u2();
     self.hdr.major = self.parse_u2();
     self.hdr.conpool_count = self.parse_u2();
@@ -70,30 +74,31 @@ fn uint ClassFile.parse_u4(&self) @inline {
 
 */
 
-struct AccessFlagList {
-    AccessFlagKind[5] kinds;
-    usz pos;
-}
-    
-fn void AccessFlagList.append(&self, AccessFlagKind kind) {
-    self.kinds[self.pos++] = kind;
-}
 
-enum AccessFlagKind {
-    AF_PUBLIC,
-    AF_FINAL,
-    AF_SUPER,
-    AF_INTERFACE,
-    AF_ABSTRACT,
-    AF_SYNTEHTIC,
-    AF_ANNOTATION,
-    AF_ENUM
+bitstruct ClassAccessFlags : ushort {
+    bool acc_public     : 0;
+    bool acc_final      : 4;
+    bool acc_super      : 5;
+    bool acc_interface  : 9;
+    bool acc_abstract   : 10;
+    bool acc_synthetic  : 12;
+    bool acc_annotation : 13;
+    bool acc_enum       : 14;
 }
 
-fn void ClassFile.parse_acc(&self) {
-    ushort access_flags = self.parse_u2();
-    if (access_flags & 1){
-        self.acc_list.append(AF_PUBLIC);
-    } 
 
+fn void? ClassFile.parse_class_acc(&self) {
+    ushort acc_flags = self.parse_u2();
+    ClassAccessFlags class_flags = (ClassAccessFlags) acc_flags;
+    if (class_flags.acc_interface) {
+        if (!class_flags.acc_abstract || class_flags.acc_final 
+            || class_flags.acc_super  || class_flags.acc_synthetic
+            || class_flags.acc_enum) {
+            return excuse::INVALID_CLASS_FLAGS~;
+        }
+    } else if (class_flags.acc_abstract && class_flags.acc_final) {
+        return excuse::INVALID_CLASS_FLAGS~;
+    }
+
+    self.class_access_flags = class_flags;
 } 

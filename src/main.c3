@@ -36,6 +36,7 @@ fn int main(String[] args)
     Organized og = { .cf = &cf };
     og.read_header();
     og.read_conpool();
+    og.read_class_flags((ushort) og.cf.class_access_flags);
     defer mem::free(bytecode);
     
 	return 0;
