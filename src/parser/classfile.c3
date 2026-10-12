@@ -34,7 +34,7 @@ fn void? ClassFile.init_cf(&self, char[] bc) {
 
 
 
-fn void? ClassFile.parse_header(&self) @private {
+fn void? ClassFile.parse_header(&self)  {
     self.hdr.magic = self.parse_u4();
     if (self.hdr.magic != 0xCAFEBABE) return INVALID_MAGIC~; 
     self.hdr.minor = self.parse_u2();
@@ -43,14 +43,14 @@ fn void? ClassFile.parse_header(&self) @private {
 }
 
 
-fn ushort ClassFile.parse_u2(&self) {
+fn ushort ClassFile.parse_u2(&self) @inline {
     ushort res = ((uint) self.bytecode[self.pos] << 8 
                   | (uint) self.bytecode[self.pos + 1]);
     self.pos += 2; 
     return res;
 }
 
-fn uint ClassFile.parse_u4(&self) {
+fn uint ClassFile.parse_u4(&self) @inline {
     uint res = ((uint) self.bytecode[self.pos] << 24 
                 | ((uint) self.bytecode[self.pos + 1] << 16)
                 | (uint) self.bytecode[self.pos + 2] << 8
