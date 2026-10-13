@@ -1,8 +1,10 @@
 module jvm::parser;
 
-import jvm::excuse;
 import std::io;
 import libc;
+
+excuse { TYPE_NONEXIST }
+
 
 fn ConstantType? get_type(char tag)  {
     switch (tag) {
@@ -23,7 +25,7 @@ fn ConstantType? get_type(char tag)  {
         case 18: return ConstantType.TYPE_INVOKEDYNAMIC;
         case 19: return ConstantType.TYPE_MODUL;
         case 20: return ConstantType.TYPE_PACKAGE;
-        default: return excuse::TYPE_NONEXIST~;
+        default: return TYPE_NONEXIST~;
     }
 
 }
@@ -140,7 +142,7 @@ fn void? ClassFile.parse_conpool(&self) {
                 };
 
                 entry.etype.entry_method_handle = handle;   
-            default: return excuse::TYPE_NONEXIST~;
+            default: return TYPE_NONEXIST~;
         }
         self.conpool.append(entry);
     }

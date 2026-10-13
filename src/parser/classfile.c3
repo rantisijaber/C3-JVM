@@ -1,23 +1,46 @@
 module jvm::parser;
 
-import jvm::excuse;
 import std::io;
 import libc;
 
+excuse { 
+    INVALID_CLASS_FLAGS, 
+    INVALID_MAGIC, 
+    INVALID_THIS_CLASS,
+    INVALID_SUPER_CLASS
+}
+
+
 struct Header {
     uint magic;
-    uint minor;
-    uint major;
+    ushort minor;
+    ushort major;
     ushort conpool_count;
 }
+
+/*
+bitstruct Header : char[10] {
+    uint magic          : 0..31;
+    ushort minor        : 32..47;
+    ushort major        : 48..63;
+    ushort conpool_count: 64..79;
+}
+
+
+fn void? ClassFile.parse_header(&self) {
+    Header hdr = (Header)self.bytecode[0..9];
+}
+*/
 
 struct ClassFile {
     usz len;
     usz pos;
-    Header hdr; 
+    Header hdr;
+    ushort this_class;
+    ushort super_class;
+    ClassAccessFlags class_access_flags;
     ConstantPool conpool;
     char[] bytecode;
-    ClassAccessFlags class_access_flags;
 }
 
 fn void? ClassFile.init_cf(&self, char[] bc) {
@@ -40,11 +63,12 @@ fn void? ClassFile.init_cf(&self, char[] bc) {
 
 fn void? ClassFile.parse_header(&self)  {
     self.hdr.magic = self.parse_u4();
-    if (self.hdr.magic != 0xCAFEBABE) return excuse::INVALID_MAGIC~; 
+    if (self.hdr.magic != 0xCAFEBABE) return INVALID_MAGIC~; 
     self.hdr.minor = self.parse_u2();
     self.hdr.major = self.parse_u2();
     self.hdr.conpool_count = self.parse_u2();
 }
+
 
 
 fn ushort ClassFile.parse_u2(&self) @inline {
@@ -94,11 +118,29 @@ fn void? ClassFile.parse_class_acc(&self) {
         if (!class_flags.acc_abstract || class_flags.acc_final 
             || class_flags.acc_super  || class_flags.acc_synthetic
             || class_flags.acc_enum) {
-            return excuse::INVALID_CLASS_FLAGS~;
+            return INVALID_CLASS_FLAGS~;
         }
     } else if (class_flags.acc_abstract && class_flags.acc_final) {
-        return excuse::INVALID_CLASS_FLAGS~;
+        return INVALID_CLASS_FLAGS~;
     }
 
     self.class_access_flags = class_flags;
+    self.parse_this_super()!;
 } 
+
+fn void? ClassFile.parse_this_super(&self) {
+    ushort this_class = self.parse_u2();
+    io::printfn("%d", this_class);
+    if (self.conpool[this_class].tag != TYPE_CLASS) return INVALID_THIS_CLASS~;
+    ushort super_class = self.parse_u2();
+    if (super_class == 0 || self.class_access_flags.acc_interface) {
+        usz class_name_index = self.conpool[super_class].etype.entry_16bit;
+        char[] class_name = self.conpool[class_name_index].etype.entry_utf8;
+        io::printfn("WTFFFF%s", class_name);
+        if (class_name != "java/lang/Object") return INVALID_SUPER_CLASS~;    
+    }
+    
+    self.this_class = this_class;
+    self.super_class = super_class;
+    
+}

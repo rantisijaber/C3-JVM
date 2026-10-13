@@ -20,6 +20,10 @@ fn void Organized.read_class_flags(&self, ushort val) {
     for (ushort i = 0; i < 16; i++) {
         if (val & (1 << i)) io::printfn(names[i]);
     }
+    ushort super_class = self.cf.super_class;
+    io::printfn("this_class: %s", self.cf.conpool[self.cf.this_class].etype.entry_utf8);
+    io::printfn("super_class: %d, parent class: %s", super_class, 
+                self.cf.conpool[super_class].etype.entry_utf8);
 }
 
 fn void Organized.init_organized(&self, ClassFile* cf) {
@@ -40,6 +44,8 @@ fn void Organized.read_conpool(&self) {
         io::printfn("Index: %d <-> Tag: %s" , i, entry.tag);
     } 
 }
+
+
 
 
 
