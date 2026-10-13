@@ -20,10 +20,16 @@ fn void Organized.read_class_flags(&self, ushort val) {
     for (ushort i = 0; i < 16; i++) {
         if (val & (1 << i)) io::printfn(names[i]);
     }
+    ushort this_class = self.cf.this_class;
     ushort super_class = self.cf.super_class;
-    io::printfn("this_class: %s", self.cf.conpool[self.cf.this_class].etype.entry_utf8);
+
+    ushort this_class_utf8_ind = self.cf.conpool[this_class].etype.entry_16bit;
+    ushort super_class_utf8_ind = self.cf.conpool[super_class].etype.entry_16bit;
+
+    io::printfn("this_class: %d, %s", this_class, 
+                (String)self.cf.conpool[this_class_utf8_ind].etype.entry_utf8);
     io::printfn("super_class: %d, parent class: %s", super_class, 
-                self.cf.conpool[super_class].etype.entry_utf8);
+                (String)self.cf.conpool[super_class_utf8_ind].etype.entry_utf8);
 }
 
 fn void Organized.init_organized(&self, ClassFile* cf) {

@@ -106,6 +106,7 @@ fn void? ClassFile.parse_conpool(&self) {
         ConstantType entag = get_type(tag)!;
        
         ConPoolEntry entry = { .tag = entag };
+        bool is64 = false;
 
         switch (entag) {
             case ConstantType.TYPE_UTF8: 
@@ -130,8 +131,7 @@ fn void? ClassFile.parse_conpool(&self) {
                 ulong parsed = ((ulong) f32 << 32)
                                 | ((ulong)s32);
                 entry.etype.entry_64bit = parsed;
-                i++;
-                self.conpool.append( { .tag = TYPE_AFTER64, .etype = {}});
+                i++; is64 = true;
             case ConstantType.TYPE_CLASS:
             case ConstantType.TYPE_STRING:
             case ConstantType.TYPE_METHODTYPE:
@@ -149,5 +149,6 @@ fn void? ClassFile.parse_conpool(&self) {
             default: return TYPE_NONEXIST~;
         }
         self.conpool.append(entry);
+        if (is64) self.conpool.append( { .tag = TYPE_AFTER64, .etype = {}});
     }
 }
