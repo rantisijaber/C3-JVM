@@ -36,7 +36,8 @@ fn void Organized.read_class_flags(&self, ushort val) {
     ushort[] interface_indices = self.cf.interface_indices;
 
     foreach (ushort index : interface_indices) {
-        io::printfn("Interface %d: %s", index, self.cf.conpool[index].etype.entry_utf8);
+        ushort inter_index = self.cf.conpool[index].etype.entry_16bit;
+        io::printfn("Interface %d: %s", index, (String) self.cf.conpool[inter_index].etype.entry_utf8);
     }
 }
 

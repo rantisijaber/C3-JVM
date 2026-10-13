@@ -53,13 +53,16 @@ fn void? ClassFile.init_cf(&self, char[] bc) {
         .pos = 0,
         .hdr = {},
         .conpool = {},
-        .class_access_flags = {}
+        .class_access_flags = {},
+        .interface_count = 0,
+        .interface_indices = {}
     };
 
     self.parse_header()!;
     self.conpool.init_conpool(self.hdr.conpool_count);
     self.parse_conpool()!;
     self.parse_class_acc()!;
+    self.parse_interfaces()!;
 }
 
 
