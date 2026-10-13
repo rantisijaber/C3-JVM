@@ -7,7 +7,8 @@ excuse {
     INVALID_CLASS_FLAGS, 
     INVALID_MAGIC, 
     INVALID_THIS_CLASS,
-    INVALID_SUPER_CLASS
+    INVALID_SUPER_CLASS,
+    INVALID_INTERFACE
 }
 
 
@@ -38,6 +39,8 @@ struct ClassFile {
     Header hdr;
     ushort this_class;
     ushort super_class;
+    ushort interface_count;
+    ushort[] interface_indices;
     ClassAccessFlags class_access_flags;
     ConstantPool conpool;
     char[] bytecode;
@@ -136,11 +139,22 @@ fn void? ClassFile.parse_this_super(&self) {
     if (super_class == 0 || self.class_access_flags.acc_interface) {
         usz class_name_index = self.conpool[super_class].etype.entry_16bit;
         char[] class_name = self.conpool[class_name_index].etype.entry_utf8;
-        io::printfn("WTFFFF%s", class_name);
         if (class_name != "java/lang/Object") return INVALID_SUPER_CLASS~;    
     }
     
     self.this_class = this_class;
     self.super_class = super_class;
     
+}
+
+fn void? ClassFile.parse_interfaces(&self) {
+    ushort interface_count = self.parse_u2();
+    ushort[] interface_indices = mem::new_array(ushort, (sz) interface_count); 
+    for (usz i = 0; i < interface_count; i++) {
+        interface_indices[i] = self.parse_u2();
+        if (self.conpool[interface_indices[i]].tag != TYPE_CLASS) return INVALID_INTERFACE~;
+    }
+
+    self.interface_count = interface_count;
+    self.interface_indices = interface_indices;
 }

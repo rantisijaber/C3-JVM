@@ -30,6 +30,14 @@ fn void Organized.read_class_flags(&self, ushort val) {
                 (String)self.cf.conpool[this_class_utf8_ind].etype.entry_utf8);
     io::printfn("super_class: %d, parent class: %s", super_class, 
                 (String)self.cf.conpool[super_class_utf8_ind].etype.entry_utf8);
+
+    ushort interface_count = self.cf.interface_count;
+    io::printfn("Interface Count: %d", interface_count);
+    ushort[] interface_indices = self.cf.interface_indices;
+
+    foreach (ushort index : interface_indices) {
+        io::printfn("Interface %d: %s", index, self.cf.conpool[index].etype.entry_utf8);
+    }
 }
 
 fn void Organized.init_organized(&self, ClassFile* cf) {
