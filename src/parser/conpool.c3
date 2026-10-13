@@ -49,6 +49,8 @@ enum ConstantType  {
     TYPE_INVOKEDYNAMIC,
     TYPE_MODUL,
     TYPE_PACKAGE,
+
+    TYPE_AFTER64
 }
 
 
@@ -128,6 +130,8 @@ fn void? ClassFile.parse_conpool(&self) {
                 ulong parsed = ((ulong) f32 << 32)
                                 | ((ulong)s32);
                 entry.etype.entry_64bit = parsed;
+                i++;
+                self.conpool.append( { .tag = TYPE_AFTER64, .etype = {}});
             case ConstantType.TYPE_CLASS:
             case ConstantType.TYPE_STRING:
             case ConstantType.TYPE_METHODTYPE:
