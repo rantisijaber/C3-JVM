@@ -34,6 +34,7 @@ fn void? ClassFile.parse_header(&self) {
 */
 
 struct ClassFile {
+    allocators::DynamicArenaAllocator parser_arena;
     usz len;
     usz pos;
     Header hdr;
@@ -42,6 +43,7 @@ struct ClassFile {
     ushort interface_count;
     ushort[] interface_indices;
     ClassAccessFlags class_access_flags;
+    Field[] fields;
     ConstantPool conpool;
     char[] bytecode;
 }
