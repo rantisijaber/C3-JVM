@@ -89,13 +89,16 @@ fn ConPoolEntry ConstantPool.get(&self, usz ind) @operator([]) {
     return self.map[ind];
 }
 
+fn void ConstantPool.set(&self, usz ind, ConPoolEntry entry) @operator([]=) {
+    self.map[ind] = entry;
+}
 fn void ConstantPool.append(&self, ConPoolEntry entry) {
     self.map[self.pos++] = entry;
 }
 
 
 fn void? ClassFile.parse_conpool(&self) {
-    self.conpool.map[0] = {
+    self.conpool[0] = {
         .tag = TYPE_IND0,
         .etype = {}
     };
