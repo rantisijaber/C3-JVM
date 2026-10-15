@@ -1,6 +1,12 @@
 # c3-jvm
 
-building the first jvm in C3. currently at parsing stage. header, constant pool, class access flags are complete.
+building the first jvm in C3. currently at parsing stage. currently these parts are complete:
+    Header,
+    Constant Pool,
+    Class Access Flags,
+    This and Super Class,
+    Interface parsing
+    Field access flags and attributes
 
 
 ## References
