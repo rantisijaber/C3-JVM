@@ -34,7 +34,7 @@ fn void? ClassFile.parse_header(&self) {
 */
 
 struct ClassFile {
-    allocators::DynamicArenaAllocator parser_arena;
+    DynamicArenaAllocator parser_arena;
     usz len;
     usz pos;
     Header hdr;
@@ -60,11 +60,17 @@ fn void? ClassFile.init_cf(&self, char[] bc) {
         .interface_indices = {}
     };
 
+    self.parser_arena.init(mem, 16 * 1024);
+
     self.parse_header()!;
-    self.conpool.init_conpool(self.hdr.conpool_count);
+    self.conpool.init_conpool(self, self.hdr.conpool_count);
     self.parse_conpool()!;
     self.parse_class_acc()!;
     self.parse_interfaces()!;
+}
+
+fn void? ClassFile.destroy(&self) {
+    self.parser_arena.free();
 }
 
 
@@ -154,7 +160,7 @@ fn void? ClassFile.parse_this_super(&self) {
 
 fn void? ClassFile.parse_interfaces(&self) {
     ushort interface_count = self.parse_u2();
-    ushort[] interface_indices = mem::new_array(ushort, (sz) interface_count); 
+    ushort[] interface_indices = alloc::new_array(&self.parser_arena, ushort, interface_count); 
     for (usz i = 0; i < interface_count; i++) {
         interface_indices[i] = self.parse_u2();
         if (self.conpool[interface_indices[i]].tag != TYPE_CLASS) return INVALID_INTERFACE~;

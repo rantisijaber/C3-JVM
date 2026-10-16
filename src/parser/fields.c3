@@ -46,7 +46,7 @@ fn void? Field.init(&self, ClassFile* cf) {
     self.descriptor_count = cf.parse_u2();
     if (cf.conpool[self.descriptor_count].tag != TYPE_UTF8) return INVALID_FIELD_DESC_COUNT~;
     self.attribute_count = cf.parse_u2();
-    self.attributes = mem::new_array(Attribute, (sz) self.attribute_count);
+    self.attributes = alloc::new_array(&cf.parser_arena, Attribute, self.attribute_count);
     for (usz i = 0; i < self.attribute_count; i++) {
         ushort name_index = cf.parse_u2();
         uint length = cf.parse_u4();

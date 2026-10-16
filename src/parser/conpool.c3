@@ -77,9 +77,9 @@ struct ConstantPool {
     usz pos;
 }
 
-fn void ConstantPool.init_conpool(&self,  ushort conpool_count) {
+fn void ConstantPool.init_conpool(&self,  ClassFile* cf, ushort conpool_count) {
     *self = {
-        .map = mem::new_array(ConPoolEntry, (sz) conpool_count),
+        .map = alloc::new_array(&cf.parser_arena, ConPoolEntry,  conpool_count),
         .pos = 1
     };
 }
