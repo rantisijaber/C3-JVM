@@ -16,6 +16,8 @@ struct Organized {
 }
 
 fn void Organized.read_class_flags(&self, ushort val) {
+    io::printfn("CLASS ACCESS FLAGS");
+    io::printfn("============");
     String[16] names = @flag_names(ClassAccessFlags);
     for (ushort i = 0; i < 16; i++) {
         if (val & (1 << i)) io::printfn(names[i]);
@@ -38,6 +40,7 @@ fn void Organized.read_class_flags(&self, ushort val) {
     foreach (ushort index : interface_indices) {
         ushort inter_index = self.cf.conpool[index].etype.entry_16bit;
         io::printfn("Interface %d: %s", index, (String) self.cf.conpool[inter_index].etype.entry_utf8);
+    io::printfn("============");
     }
 }
 
@@ -47,30 +50,55 @@ fn void Organized.init_organized(&self, ClassFile* cf) {
 }
 
 fn void Organized.read_header(&self) {
+    io::printfn("============");
+    io::printfn("HEADER");
+    io::printfn("============");
     Header hdr = self.cf.hdr;
     io::printfn("Magic: 0x%08x", hdr.magic);
     io::printfn("Minor Version: %d", hdr.minor);
     io::printfn("Major Version: %d", hdr.major);
     io::printfn("Constant Pool Counter: %d", hdr.conpool_count);
+    io::printfn("============");
 }
 
 fn void Organized.read_conpool(&self) {
+    io::printfn("CONSTANT POOL");
+    io::printfn("============");
     foreach (i, ConPoolEntry entry : self.cf.conpool.map) {
         io::printfn("Index: %d <-> Tag: %s" , i, entry.tag);
-    } 
+    }
+    io::printfn("============");
 }
 
 
 fn void Organized.read_fields(&self) {
+    io::printfn("FIELDS");
+    io::printfn("============");
     if (self.cf.fields.len == 0) io::printfn("No fields");
     foreach(i, Field field : self.cf.fields) {
-        io::printfn("Index: %d", i);
+        io::printfn("\tFIeld %d:", i);
+        io::printfn("\tField name index: %d", field.name_index);
+        io::printfn("\tField descriptor count: %d", field.descriptor_count);
+        io::printfn("\tField attribute count: %d", field.attribute_count);
+        io::printfn("\tField attributes: ");
+        self.read_attributes(field.attributes);
         io::printfn("\tField Access Flags:");
         ushort val = (ushort) self.cf.fields[i].access_flags;
         String[16] names = @flag_names(FieldAccessFlags);
         for (ushort name_ind = 0; name_ind < 16; name_ind++) {
-            if (val & (1 << name_ind)) io::printfn(names[name_ind]);
+            if (val & (1 << name_ind)) io::printfn("\t\t%s", names[name_ind]);
         }
+
+
+    }
+    io::printfn("============");
+}
+
+fn void Organized.read_attributes(&self, Attribute[] attributes) @local {
+    foreach(i, Attribute attr : attributes) {
+        io::printfn("\t\tAttribute name index: %d", attr.name_index);
+        io::printfn("\t\tAttribute length: %d", attr.length);
+        io::printfn("\t\tAttribute info: %s", (String)attr.info);
     }
 }
 
