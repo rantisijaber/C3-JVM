@@ -5,7 +5,7 @@ building the first jvm in C3. currently at parsing stage. currently these parts 
     Constant Pool,
     Class Access Flags,
     This and Super Class,
-    Interface parsing
+    Interface parsing,
     Field access flags and attributes
 
 

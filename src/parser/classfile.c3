@@ -30,7 +30,7 @@ bitstruct Header : char[10] {
 
 fn void? ClassFile.parse_header(&self) {
     Header hdr = (Header)self.bytecode[0..9];
-}
+} 
 */
 
 struct ClassFile {
@@ -41,6 +41,7 @@ struct ClassFile {
     ushort this_class;
     ushort super_class;
     ushort interface_count;
+    ushort field_count;
     ushort[] interface_indices;
     ClassAccessFlags class_access_flags;
     Field[] fields;
@@ -52,24 +53,21 @@ fn void? ClassFile.init_cf(&self, char[] bc) {
     *self = { 
         .bytecode = bc, 
         .len = bc.len, 
-        .pos = 0,
-        .hdr = {},
-        .conpool = {},
-        .class_access_flags = {},
-        .interface_count = 0,
-        .interface_indices = {}
     };
 
     self.parser_arena.init(mem, 16 * 1024);
-
     self.parse_header()!;
     self.conpool.init_conpool(self, self.hdr.conpool_count);
+}
+
+fn void? ClassFile.parse_classfile(&self) {
     self.parse_conpool()!;
     self.parse_class_acc()!;
     self.parse_interfaces()!;
+    self.parse_fields()!;
 }
 
-fn void? ClassFile.destroy(&self) {
+fn void ClassFile.destroy(&self) {
     self.parser_arena.free();
 }
 
@@ -144,7 +142,6 @@ fn void? ClassFile.parse_class_acc(&self) {
 
 fn void? ClassFile.parse_this_super(&self) {
     ushort this_class = self.parse_u2();
-    io::printfn("%d", this_class);
     if (self.conpool[this_class].tag != TYPE_CLASS) return INVALID_THIS_CLASS~;
     ushort super_class = self.parse_u2();
     if (super_class == 0 || self.class_access_flags.acc_interface) {
@@ -169,3 +166,16 @@ fn void? ClassFile.parse_interfaces(&self) {
     self.interface_count = interface_count;
     self.interface_indices = interface_indices;
 }
+
+
+fn void? ClassFile.parse_fields(&self) {
+    ushort field_count = self.parse_u2();
+    self.field_count = field_count;
+    self.fields = alloc::new_array(&self.parser_arena, Field, self.field_count);
+    for (usz i = 0; i < field_count; i++) {
+        Field field = {};
+        field.init(self)!;
+        self.fields[i] = field;
+    }
+}
+

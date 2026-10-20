@@ -2,7 +2,7 @@ module jvm::parser;
 import std::io;
 
 
-macro String[16] @class_flag_names($Type) {
+macro String[16] @flag_names($Type) {
     String[16] names;
     $foreach $member : $Type::members:
         names[$member.bitoffset] = $member.name;
@@ -16,7 +16,7 @@ struct Organized {
 }
 
 fn void Organized.read_class_flags(&self, ushort val) {
-    String[16] names = @class_flag_names(ClassAccessFlags);
+    String[16] names = @flag_names(ClassAccessFlags);
     for (ushort i = 0; i < 16; i++) {
         if (val & (1 << i)) io::printfn(names[i]);
     }
@@ -60,6 +60,19 @@ fn void Organized.read_conpool(&self) {
     } 
 }
 
+
+fn void Organized.read_fields(&self) {
+    if (self.cf.fields.len == 0) io::printfn("No fields");
+    foreach(i, Field field : self.cf.fields) {
+        io::printfn("Index: %d", i);
+        io::printfn("\tField Access Flags:");
+        ushort val = (ushort) self.cf.fields[i].access_flags;
+        String[16] names = @flag_names(FieldAccessFlags);
+        for (ushort name_ind = 0; name_ind < 16; name_ind++) {
+            if (val & (1 << name_ind)) io::printfn(names[name_ind]);
+        }
+    }
+}
 
 
 

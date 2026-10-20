@@ -29,15 +29,21 @@ fn int main(String[] args)
 
     if (catch error = cf.init_cf(bytecode)) {
         io::eprintfn("Error: Could not initialize class file - %s", error);
+        return 1;
     }
     
-
+    if (catch error = cf.parse_classfile()) {
+        io::printfn("Error: Could not parse class file - %s", error);
+        return 1;
+    }
 
     Organized og = { .cf = &cf };
     og.read_header();
     og.read_conpool();
     og.read_class_flags((ushort) og.cf.class_access_flags);
+    og.read_fields();
     defer mem::free(bytecode);
+    og.cf.destroy();
     
 	return 0;
 }

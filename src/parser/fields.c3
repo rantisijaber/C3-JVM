@@ -58,9 +58,11 @@ fn void? Field.init(&self, ClassFile* cf) {
 
 fn void? Field.parse_acc(&self, ClassFile* cf){
     FieldAccessFlags acc_flags = (FieldAccessFlags) cf.parse_u2();
-    if (!(acc_flags.acc_public ^ acc_flags.acc_private ^ acc_flags.acc_protected) 
-        || (acc_flags.acc_public && acc_flags.acc_public && acc_flags.acc_protected)) {
-        return INVALID_FIELD_ACCESS_FLAGS~;
+   if (acc_flags.acc_public || acc_flags.acc_private || acc_flags.acc_protected) {      
+        if (!(acc_flags.acc_public ^ acc_flags.acc_private ^ acc_flags.acc_protected)  
+            || (acc_flags.acc_public && acc_flags.acc_public && acc_flags.acc_protected)) {
+            return INVALID_FIELD_ACCESS_FLAGS~;
+        }
     }
 
     if (cf.class_access_flags.acc_interface) {

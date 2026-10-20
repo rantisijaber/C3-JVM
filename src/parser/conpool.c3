@@ -82,6 +82,7 @@ fn void ConstantPool.init_conpool(&self,  ClassFile* cf, ushort conpool_count) {
         .map = alloc::new_array(&cf.parser_arena, ConPoolEntry,  conpool_count),
         .pos = 1
     };
+    
 }
 
 
@@ -92,8 +93,12 @@ fn ConPoolEntry ConstantPool.get(&self, usz ind) @operator([]) {
 fn void ConstantPool.set(&self, usz ind, ConPoolEntry entry) @operator([]=) {
     self.map[ind] = entry;
 }
+
+
+
 fn void ConstantPool.append(&self, ConPoolEntry entry) {
-    self.map[self.pos++] = entry;
+    self.map[self.pos] = entry;
+    self.pos++;
 }
 
 
@@ -102,7 +107,7 @@ fn void? ClassFile.parse_conpool(&self) {
         .tag = TYPE_IND0,
         .etype = {}
     };
-
+    
     for (uint i = 1; i < self.hdr.conpool_count; i++) {
         char tag = self.bytecode[self.pos];
         self.pos++;       
@@ -110,7 +115,6 @@ fn void? ClassFile.parse_conpool(&self) {
        
         ConPoolEntry entry = { .tag = entag };
         bool is64 = false;
-
         switch (entag) {
             case ConstantType.TYPE_UTF8: 
                 ushort length = self.parse_u2();
