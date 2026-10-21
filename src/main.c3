@@ -7,16 +7,30 @@ import std::io;
 fn int main(String[] args)
 {
     if (args.len != 2) {
-        io::printn("TEST");
+        io::eprintn("Error: Arg count needs to be 2");
         return 1;
     }
 
 
-    io::printn("TEST PASSED");
+    String filename = args[1];
+    char[]? load_file;
 
+    if (!filename.ends_with(".class")) {
+        if (filename.contains(".")) {
+            io::eprintfn("Error: Invaid file type");
+            return 1;
+        }
+        String full_filename = filename.tconcat(".class");
+        if (file::is_file(full_filename)) {
+            load_file = file::load(mem, full_filename);
+        } else {
+            io::eprintfn("Error: No such class file exists in this directory");
+        } 
 
+    }
+    
 
-    char[]? load_file = file::load(mem, args[1]);
+    load_file = file::load(mem, filename);
     
     if (catch error = load_file) {
         io::eprintfn("Error: Could not load file - %s", error);
