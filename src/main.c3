@@ -21,6 +21,7 @@ fn int main(String[] args)
             return 1;
         }
         String full_filename = filename.tconcat(".class");
+        io::printfn(full_filename);
         if (file::is_file(full_filename)) {
             load_file = file::load(mem, full_filename);
         } else {
@@ -28,11 +29,10 @@ fn int main(String[] args)
             return 1;
         } 
 
+    } else {
+        load_file = file::load(mem, filename);
     }
-    
 
-    load_file = file::load(mem, filename);
-    
     if (catch error = load_file) {
         io::eprintfn("Error: Could not load file - %s", error);
         return 1;
