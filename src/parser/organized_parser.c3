@@ -66,6 +66,53 @@ fn void Organized.read_conpool(&self) {
     io::printfn("============");
     foreach (i, ConPoolEntry entry : self.cf.conpool.map) {
         io::printfn("Index: %d <-> Tag: %s" , i, entry.tag);
+    
+        switch (entry.tag) {
+            case ConstantType.TYPE_UTF8:
+                io::printfn("\tValue: \"%s\" ", (String) entry.etype.entry_utf8);
+            case ConstantType.TYPE_FIELDREF:
+            case ConstantType.TYPE_METHODREF:
+            case ConstantType.TYPE_INTERFACE_METHODREF:
+                ushort class_index = 
+                    (ushort) (entry.etype.entry_32bit >> 16);
+                ushort name_and_type_index = 
+                    (ushort) (entry.etype.entry_32bit & 0xFFFF);
+                io::printfn("\tValue: Class Index (%d), Name and Type Index (%d)", 
+                            class_index, name_and_type_index);
+            case ConstantType.TYPE_NAMEANDTYPE:
+                ushort name_index = 
+                    (ushort) (entry.etype.entry_32bit >> 16);
+                ushort descriptor_index =
+                    (ushort) (entry.etype.entry_32bit & 0xFFFF);
+                io::printfn("\tValue: Name Index (%d), Descriptor Index (%d)", 
+                            name_index, descriptor_index);
+            case ConstantType.TYPE_DYNAMIC:
+            case ConstantType.TYPE_INVOKEDYNAMIC:
+                ushort bootstrap_method_attr_index = (ushort) (entry.etype.entry_32bit >> 16);
+                ushort name_and_type_index = (ushort) (entry.etype.entry_32bit & 0xFFFF);
+                io::printfn("\tValue: Bootstrap Method Attribute Index (%d), Name and Type Index (%d)", 
+                            bootstrap_method_attr_index, name_and_type_index);
+            case ConstantType.TYPE_INTEGER:
+            case ConstantType.TYPE_FLOAT:                
+                io::printfn("\tValue: %d", entry.etype.entry_32bit);
+            case ConstantType.TYPE_LONG:
+            case ConstantType.TYPE_DOUBLE:
+                io::printfn("\tValue: %d", entry.etype.entry_64bit);
+            case ConstantType.TYPE_STRING:
+                io::printfn("\tValue: String Index (%d)", entry.etype.entry_16bit);
+            case ConstantType.TYPE_METHODTYPE:
+                io::printfn("\tValue: Descriptor Index (%d)", entry.etype.entry_16bit);
+            case ConstantType.TYPE_MODUL:
+            case ConstantType.TYPE_CLASS:
+            case ConstantType.TYPE_PACKAGE:
+                io::printfn("\tValue: Name Index (%d)", entry.etype.entry_16bit);
+            case ConstantType.TYPE_METHODHANDLE:
+                io::printfn("\tValue: Reference Kind (%d), Reference Index (%d)",
+                            entry.etype.entry_method_handle.ref_kind,
+                            entry.etype.entry_method_handle.ref_index);
+            default: io::printfn("Value: None (Special Constant)");
+
+        }
     }
     io::printfn("============");
 }
@@ -75,7 +122,7 @@ fn void Organized.read_fields(&self) {
     io::printfn("FIELDS");
     io::printfn("============");
     if (self.cf.fields.len == 0) io::printfn("No fields");
-    foreach(i, Field field : self.cf.fields) {
+foreach(i, Field field : self.cf.fields) {
         io::printfn("\tFIeld %d:", i);
         io::printfn("\tField name index: %d", field.name_index);
         io::printfn("\tField descriptor count: %d", field.descriptor_count);
