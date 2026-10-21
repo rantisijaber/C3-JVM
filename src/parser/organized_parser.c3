@@ -122,7 +122,7 @@ fn void Organized.read_fields(&self) {
     io::printfn("FIELDS");
     io::printfn("============");
     if (self.cf.fields.len == 0) io::printfn("No fields");
-foreach(i, Field field : self.cf.fields) {
+    foreach(i, Field field : self.cf.fields) {
         io::printfn("\tFIeld %d:", i);
         io::printfn("\tField name index: %d", field.name_index);
         io::printfn("\tField descriptor count: %d", field.descriptor_count);
