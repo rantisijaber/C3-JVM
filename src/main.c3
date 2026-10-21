@@ -25,6 +25,7 @@ fn int main(String[] args)
             load_file = file::load(mem, full_filename);
         } else {
             io::eprintfn("Error: No such class file exists in this directory");
+            return 1;
         } 
 
     }
