@@ -151,6 +151,28 @@ fn void Organized.read_attributes(&self, Attribute[] attributes) @local {
 
 
 
+fn void Organized.read_methods(&self) {
+    io::printfn("METHODS");
+    io::printfn("============");
+    if (self.cf.methods.len == 0) io::printfn("No methods");
+    foreach(i, Method method : self.cf.methods) {
+        io::printfn("\tMethod %d:", i);
+        io::printfn("\tMethod name index: %d", method.name_index);
+        io::printfn("\tMethod descriptor index: %d", method.descriptor_index);
+        io::printfn("\tMethod attribute count: %d", method.attribute_count);
+        io::printfn("\tMethod attributes: ");
+        self.read_attributes(method.attributes);
+        io::printfn("\tMethod Access Flags:");
+        ushort val = (ushort) self.cf.methods[i].access_flags;
+        String[16] names = @flag_names(MethodAccessFlags);
+        for (ushort name_ind = 0; name_ind < 16; name_ind++) {
+            if (val & (1 << name_ind)) io::printfn("\t\t%s", names[name_ind]);
+        }
+
+
+    }
+    io::printfn("============");
+}
 
 
 

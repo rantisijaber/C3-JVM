@@ -42,11 +42,13 @@ struct ClassFile {
     ushort super_class;
     ushort interface_count;
     ushort field_count;
-    ushort[] interface_indices;
+    ushort method_count;
     ClassAccessFlags class_access_flags;
+    ushort[] interface_indices;
     Field[] fields;
-    ConstantPool conpool;
+    Method[] methods;
     char[] bytecode;
+    ConstantPool conpool;
 }
 
 fn void? ClassFile.init_cf(&self, char[] bc) {
@@ -65,6 +67,7 @@ fn void? ClassFile.parse_classfile(&self) {
     self.parse_class_acc()!;
     self.parse_interfaces()!;
     self.parse_fields()!;
+    self.parse_methods()!;
 }
 
 fn void ClassFile.destroy(&self) {
@@ -179,3 +182,41 @@ fn void? ClassFile.parse_fields(&self) {
     }
 }
 
+
+struct Attribute {
+    ushort name_index;
+    uint length;
+    char[] info;
+}
+
+
+fn void Attribute.init(&self, ClassFile* cf, ushort name_index, uint length) {
+    *self = {
+        .name_index = name_index,
+        .length = length,
+        .info = cf.bytecode[cf.pos:length]
+    };
+}
+
+fn void ClassFile.parse_attributes(&self, Attribute[] attributes, ushort attribute_count) {
+    attributes = alloc::new_array(&self.parser_arena, Attribute, attribute_count);
+    for (usz i = 0; i < attribute_count; i++) {
+        ushort name_index = self.parse_u2();
+        uint length = self.parse_u4();
+        Attribute attribute = {};
+        attribute.init(self, name_index, length);
+        attributes[i] = attribute; 
+    }
+}
+
+fn void? ClassFile.parse_methods(&self) {
+    ushort method_count = self.parse_u2();
+    self.method_count = method_count;
+    self.methods = alloc::new_array(&self.parser_arena, Method, self.method_count); 
+    for (usz i = 0; i < self.method_count; i++) {    
+        Method method = {};
+        method.init(self)!;
+        self.methods[i] = method;
+    }
+    
+}
