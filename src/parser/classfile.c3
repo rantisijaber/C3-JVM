@@ -196,6 +196,8 @@ fn void Attribute.init(&self, ClassFile* cf, ushort name_index, uint length) {
         .length = length,
         .info = cf.bytecode[cf.pos:length]
     };
+
+    cf.pos += length;
 }
 
 fn void ClassFile.parse_attributes(&self, Attribute[] attributes, ushort attribute_count) {
@@ -211,6 +213,7 @@ fn void ClassFile.parse_attributes(&self, Attribute[] attributes, ushort attribu
 
 fn void? ClassFile.parse_methods(&self) {
     ushort method_count = self.parse_u2();
+    io::printfn("%d", method_count);
     self.method_count = method_count;
     self.methods = alloc::new_array(&self.parser_arena, Method, self.method_count); 
     for (usz i = 0; i < self.method_count; i++) {    

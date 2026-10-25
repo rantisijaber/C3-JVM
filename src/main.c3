@@ -57,6 +57,7 @@ fn int main(String[] args)
     og.read_conpool();
     og.read_class_flags((ushort) og.cf.class_access_flags);
     og.read_fields();
+    og.read_methods();
     defer mem::free(bytecode);
     og.cf.destroy();
     
