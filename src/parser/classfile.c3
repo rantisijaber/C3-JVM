@@ -211,6 +211,21 @@ fn void ClassFile.parse_attributes(&self, Attribute[] attributes, ushort attribu
     }
 }
 
+struct ExceptionTable {
+    ushort start_pc;
+    ushort end_pc;
+    ushort catch_type;
+}
+
+struct CodeAttribute {
+    ushort max_stack;
+    ushort max_locals;
+    uint code_length;
+    char[] code_bytes;
+    ushort exception_table_length;
+    ExceptionTable[] tables;
+}
+
 fn void? ClassFile.parse_methods(&self) {
     ushort method_count = self.parse_u2();
     io::printfn("%d", method_count);

@@ -1,6 +1,6 @@
 module jvm::parser;
 import std::io;
-
+import jvm::interp;
 
 macro String[16] @flag_names($Type) {
     String[16] names;
@@ -143,9 +143,23 @@ fn void Organized.read_fields(&self) {
 
 fn void Organized.read_attributes(&self, Attribute[] attributes) @local {
     foreach(i, Attribute attr : attributes) {
+        if (is_code(attr)) {
+            CodeAttribute code = {};
+            code.max_stack = attr.info[0:1];
+            code.max_locals = attr.info[2:3];
+            code.code_length = attr.info[4:7];
+            ushort clength_end = 8 + code.code_length;
+            code.code_bytes = attr.info[8:clength_end];
+            code.exception_table_length = attr.info[clength_end:clength_end+8];
+            ushort etable_start = clength_end + 9; 
+            for (usz i = 0; i < code.exception_table_length; i++) {
+                code.exception_tables[i] = attr.info[etable_start:etable_start+5];
+            }
+        }
         io::printfn("\t\tAttribute name index: %d", attr.name_index);
         io::printfn("\t\tAttribute length: %d", attr.length);
         io::printfn("\t\tAttribute info: %s", (String)attr.info);
+
     }
 }
 

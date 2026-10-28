@@ -3,14 +3,21 @@ module jvm;
 import jvm::parser;
 import std::io;
 
+fn bool view(String[] args) {
+    foreach (String str : args) {
+        if (str == "v") return true;
+    }
+
+    return false;
+}
 
 fn int main(String[] args)
 {
-    if (args.len != 2) {
-        io::eprintn("Error: Arg count needs to be 2");
+    if (args.len < 2 || args.len > 4) {
+        io::eprintn("Error: Invalid argument count");
         return 1;
     }
-
+    
 
     String filename = args[1];
     char[]? load_file;
@@ -51,15 +58,20 @@ fn int main(String[] args)
         io::printfn("Error: Could not parse class file - %s", error);
         return 1;
     }
-
-    Organized og = { .cf = &cf };
-    og.read_header();
-    og.read_conpool();
-    og.read_class_flags((ushort) og.cf.class_access_flags);
-    og.read_fields();
-    og.read_methods();
-    defer mem::free(bytecode);
-    og.cf.destroy();
     
+    /* This snippet is just testing the code attribute 
+    i know its not supposed to be here 
+    */
+    
+    if (view(args)) {        
+        Organized og = { .cf = &cf };
+        og.read_header();
+        og.read_conpool();
+        og.read_class_flags((ushort) og.cf.class_access_flags);
+        og.read_fields();
+        og.read_methods();
+    defer mem::free(bytecode);
+    cf.destroy();
+    }
 	return 0;
 }
